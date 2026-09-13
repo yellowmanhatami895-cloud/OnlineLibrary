@@ -16,6 +16,15 @@ var err error
 var username string
 var role string
 
+func getIntInput(title string) int {
+	input := getInputs([]string{title})
+	intInput, err := strconv.Atoi(input[0])
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+	return intInput
+}
 func getInputs(titles []string) []string {
 	var inputs []string
 	for _, s := range titles {
@@ -92,15 +101,47 @@ MainLoop:
 							case 1:
 							PurchaseLoop:
 								for {
-									input := getMenu("Customer Panel", []string{"Add to cart", "Remove from cart", "Filter books", "Search books", "View all books"})
+									input := getMenu("Customer Panel", []string{"Add to cart", "Remove from cart", "Search books", "View all books"})
 									switch input {
 									case 0:
 										break PurchaseLoop
 									case 1:
 									case 2:
 									case 3:
+									SearchLoop:
+										for {
+											input := getMenu("Search by :", []string{"id", "title", "Category", "author"})
+											switch input {
+											case 0:
+												break SearchLoop
+											case 1:
+												id := getIntInput("Enter id")
+												if id == 0 {
+													break SearchLoop
+												}
+												printBooksByID(id)
+											case 2:
+												title := getInputs([]string{"Enter title"})
+												if title[0] == "0" {
+													break SearchLoop
+												}
+												printBooksByTitle(title[0])
+											case 3:
+												category := getInputs([]string{"Enter category"})
+												if category[0] == "0" {
+													break SearchLoop
+												}
+												printBooksByCategory(category[0])
+											case 4:
+												author := getInputs([]string{"Enter author"})
+												if author[0] == "0" {
+													break SearchLoop
+												}
+												printBooksByAuthor(author[0])
+											}
+
+										}
 									case 4:
-									case 5:
 										printBooks()
 									}
 								}

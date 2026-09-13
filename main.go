@@ -85,6 +85,12 @@ MainLoop:
 		LoginLoop:
 			for {
 				userInfo := getInputs([]string{"Enter id", "Enter password"})
+				userid := userInfo[0]
+				id, err := strconv.Atoi(userid)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
 				if userInfo[0] == "0" {
 					break LoginLoop
 				}
@@ -101,13 +107,29 @@ MainLoop:
 							case 1:
 							PurchaseLoop:
 								for {
-									input := getMenu("Customer Panel", []string{"Add to cart", "Remove from cart", "Search books", "View all books"})
+									input := getMenu("Customer Panel", []string{"Cart", "Search books", "View all books", "owned books"}) // owned books = > delete print
 									switch input {
 									case 0:
 										break PurchaseLoop
 									case 1:
+										input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all"})
+										switch input {
+										case 1:
+											var bookIDs []int
+										AddLoop:
+											for {
+												bookID := getIntInput("Enter Book ids ")
+												if bookID == 0 {
+													break AddLoop
+												}
+												bookIDs = append(bookIDs, bookID)
+											}
+											insertBookIntoOrders(bookIDs, id, "in cart")
+										case 2:
+										case 3:
+										case 4:
+										}
 									case 2:
-									case 3:
 									SearchLoop:
 										for {
 											input := getMenu("Search by :", []string{"id", "title", "Category", "author"})
@@ -141,8 +163,9 @@ MainLoop:
 											}
 
 										}
-									case 4:
+									case 3:
 										printBooks()
+									case 4:
 									}
 								}
 							}

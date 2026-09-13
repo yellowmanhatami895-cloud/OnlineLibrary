@@ -47,13 +47,14 @@ func getMenu(title string, subjects []string) int {
 		fmt.Println("Enter menu index")
 		return -1
 	}
-	if intInput < 1 || intInput > len(subjects) {
+	if intInput < 0 || intInput > len(subjects) {
 		fmt.Printf("Enter menu index between 1 to %d\n", len(subjects))
+		return -1
 	}
 	return intInput
 }
 func main() {
-	db, err = sql.Open("sqlite", "DataBase/db.sql")
+	db, err = sql.Open("sqlite", "DataBase/OnlineLibrary.db")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -84,10 +85,25 @@ MainLoop:
 					CustomerMainLoop:
 						for {
 							fmt.Println("welcome Customer " + username)
-							input := getMenu("Customer Panel", []string{"Purchase Book", "Download PDF", "Edit Profile", "View Orders", "My Library", "Logout"}) // add to card ,filter books, search books  ,view books ,remove from card
+							input := getMenu("Customer Panel", []string{"Purchase Book", "Download PDF", "Edit Profile", "View Orders", "My Library", "Logout"})
 							switch input {
 							case 0:
 								break CustomerMainLoop
+							case 1:
+							PurchaseLoop:
+								for {
+									input := getMenu("Customer Panel", []string{"Add to cart", "Remove from cart", "Filter books", "Search books", "View all books"})
+									switch input {
+									case 0:
+										break PurchaseLoop
+									case 1:
+									case 2:
+									case 3:
+									case 4:
+									case 5:
+										printBooks()
+									}
+								}
 							}
 						}
 					case "Admin":

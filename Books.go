@@ -105,31 +105,3 @@ func printBooksByAuthor(author string) {
 	}
 
 }
-func insertBookIntoOrders(bookIDs []int, userID int, status string) {
-	result, err := db.Exec("INSERT INTO orders(user_id, status,total_price) VALUES(?, ?,?)", userID, status, 0)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	orderID, err := result.LastInsertId()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println("Order ID:", orderID)
-	var price int
-	var totalPrice int
-	for _, i := range bookIDs {
-		db.QueryRow("SELECT price FROM books WHERE id = ?", i).Scan(&price)
-		_, err := db.Exec("INSERT INTO order_items(order_id,book_id,price) VALUES(?,?,?)", orderID, i, price)
-
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		totalPrice = totalPrice + price
-	}
-	db.Exec("UPDATE orders set total_price = ? WHERE id = ?", totalPrice, orderID)
-}

@@ -112,22 +112,27 @@ MainLoop:
 									case 0:
 										break PurchaseLoop
 									case 1:
-										input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all"})
-										switch input {
-										case 1:
-											var bookIDs []int
-										AddLoop:
-											for {
-												bookID := getIntInput("Enter Book ids ")
-												if bookID == 0 {
-													break AddLoop
+										//cartLoop:
+										for {
+											input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all", "View Orders"})
+											switch input {
+											case 1:
+												var bookIDs []int
+											AddLoop:
+												for {
+													bookID := getIntInput("Enter Book ids ")
+													if bookID == 0 {
+														break AddLoop
+													}
+													bookIDs = append(bookIDs, bookID)
 												}
-												bookIDs = append(bookIDs, bookID)
+												insertBooksIntoOrders(bookIDs, id, "in cart")
+											case 2:
+											case 3:
+											case 4:
+											case 5:
+												printOrders(id)
 											}
-											insertBookIntoOrders(bookIDs, id, "in cart")
-										case 2:
-										case 3:
-										case 4:
 										}
 									case 2:
 									SearchLoop:
@@ -164,8 +169,9 @@ MainLoop:
 
 										}
 									case 3:
-										printBooks()
 									case 4:
+									case 5:
+
 									}
 								}
 							}

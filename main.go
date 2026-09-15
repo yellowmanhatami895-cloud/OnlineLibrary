@@ -224,12 +224,41 @@ MainLoop:
 					StaffMainLoop:
 						for {
 							fmt.Println("welcome Admin " + username)
-							input := getMenu("Staff panel", []string{"Manage users", "Manage books", "View orders", "View sales", "Logout"}) // add del edit print book and users
+							input := getMenu("Admin panel", []string{"Manage users", "Manage books", "View orders", "View sales", "Logout"}) // add del edit print book and users
 							switch input {
 							case 0:
 								break StaffMainLoop
 							case 1:
-								getMenu("Books", []string{"Add", "Delete", "Search"})
+							UsersLoop:
+								for {
+									input := getMenu("Users", []string{"Add", "Delete", "Edit", "Search"})
+									switch input {
+									case 0:
+										break UsersLoop
+									case 1:
+									AdminAddLoop:
+										for {
+											record := getInputs([]string{"Enter name", "email", "password", "role"})
+											for _, s := range record {
+												if s == "0" {
+													break AdminAddLoop
+												}
+											}
+											insertIntoUsers(record)
+
+										}
+									case 2:
+										for {
+											userID := getIntInput("Enter user id")
+											if userID == 0 {
+												break
+											}
+											deleteFromUsers(userID)
+										}
+									case 3:
+									case 4:
+									}
+								}
 							case 2:
 							BooksLoop:
 								for {

@@ -7,7 +7,22 @@ func insertIntoUsers(record []string) {
 		fmt.Println("wrong length")
 		return
 	}
-	_, err := db.Exec("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)", record[0], record[1], record[2], record[3])
+	row, err := db.Query("SELECT email FROM users")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var email string
+	for row.Next() {
+		row.Scan(&email)
+		if email == record[1] {
+			fmt.Println("email is already exists")
+			return
+		}
+	}
+	row.Close()
+
+	_, err = db.Exec("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)", record[0], record[1], record[2], record[3])
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -66,4 +81,14 @@ func printUsersByID(userID int) {
 	var role string
 	db.QueryRow("SELECT * FROM users WHERE id = ? ", userID).Scan(&userID, &name, &email, &password, &role)
 	fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", userID, name, email, password, role)
+}
+func deleteFromUsers(userID int) {
+	var name string
+	db.QueryRow("SELECT name FROM users WHERE id = ?", userID).Scan(&name)
+	_, err := db.Exec("DELETE FROM users WHERE id = ?", userID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(name + " DELETED")
 }

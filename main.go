@@ -126,9 +126,18 @@ MainLoop:
 													}
 													bookIDs = append(bookIDs, bookID)
 												}
-												insertBooksIntoOrders(bookIDs, id, "in cart")
+												insertBooksIntCart(bookIDs, id, "in cart")
 											case 2:
+											DeleteLoop:
+												for {
+													bookID := getIntInput("Enter book id")
+													if bookID == 0 {
+														break DeleteLoop
+													}
+													DeleteBookFromOrderItems(bookID, id, "in cart")
+												}
 											case 3:
+												payCart(id)
 											case 4:
 											case 5:
 												printOrders(id)

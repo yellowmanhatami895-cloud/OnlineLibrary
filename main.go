@@ -213,6 +213,11 @@ MainLoop:
 									}
 								}
 							case 5:
+								userInfo[0] = ""
+								userInfo[1] = ""
+								id = 0
+								userid = ""
+								break LoginLoop
 							}
 						}
 					case "Admin":

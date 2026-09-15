@@ -37,7 +37,10 @@ func editProfile(userID int) {
 	var oldEmail string
 	printUsersByID(userID)
 	info := getInputs([]string{"Enter new name", "Enter new email", "Enter new password"})
-	db.QueryRow("SELECT email FROM users WHERE id = ?").Scan(&oldEmail)
+	if info[0] == "0" || info[1] == "0" || info[2] == "0" {
+		return
+	}
+	db.QueryRow("SELECT email FROM users WHERE id = ?", userID).Scan(&oldEmail)
 	row, err := db.Query("SELECT email FROM users")
 	if err != nil {
 		fmt.Println(err)

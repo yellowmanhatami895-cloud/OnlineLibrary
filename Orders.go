@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 )
 
@@ -10,8 +11,14 @@ func insertBooksIntCart(bookIDs []int, userID int, status string) {
 	var orderID int
 	var oldTotalPrice int
 	var totalPrice int
-	db.QueryRow("SELECT status, id, total_price FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderStatus, &orderID, &oldTotalPrice)
-
+	err := db.QueryRow("SELECT status, id, total_price FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderStatus, &orderID, &oldTotalPrice)
+	if err == sql.ErrNoRows {
+		db.Exec("INSERT INTO orders(user_id,total_price,status) VALUES(?,?,?)", userID, 0, "in cart")
+		err := db.QueryRow("SELECT status, id, total_price FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderStatus, &orderID, &oldTotalPrice)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
 	if status == "in cart" {
 		for _, bookID := range bookIDs {
 			var checkID int
@@ -23,9 +30,19 @@ func insertBooksIntCart(bookIDs []int, userID int, status string) {
 			}
 			db.QueryRow("SELECT price FROM books WHERE id = ?", bookID).Scan(&price)
 
-			result, _ := db.Exec("INSERT INTO order_items(order_id, book_id, price) VALUES(?, ?, ?)", orderID, bookID, price)
+			result, err := db.Exec("INSERT INTO order_items(order_id, book_id, price) VALUES(?, ?, ?)", orderID, bookID, price)
 
-			orderItemID, _ := result.LastInsertId()
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			orderItemID, err := result.LastInsertId()
+
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 
 			totalPrice = totalPrice + price
 
@@ -36,9 +53,19 @@ func insertBooksIntCart(bookIDs []int, userID int, status string) {
 		return
 	}
 
-	result, _ := db.Exec("INSERT INTO orders(user_id, status, total_price) VALUES(?, ?, ?)", userID, status, 0)
+	result, err := db.Exec("INSERT INTO orders(user_id, status, total_price) VALUES(?, ?, ?)", userID, status, 0)
 
-	orderID2, _ := result.LastInsertId()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	orderID2, err := result.LastInsertId()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	fmt.Println("Order ID:", orderID2)
 
@@ -48,9 +75,19 @@ func insertBooksIntCart(bookIDs []int, userID int, status string) {
 
 		db.QueryRow("SELECT price FROM books WHERE id = ?", bookID).Scan(&price)
 
-		result, _ := db.Exec("INSERT INTO order_items(order_id, book_id, price) VALUES(?, ?, ?)", orderID2, bookID, price)
+		result, err := db.Exec("INSERT INTO order_items(order_id, book_id, price) VALUES(?, ?, ?)", orderID2, bookID, price)
 
-		orderItemID, _ := result.LastInsertId()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		orderItemID, err := result.LastInsertId()
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		totalPrice += price
 		fmt.Println("Order item ID:", orderItemID)
@@ -89,11 +126,17 @@ func printOrders(userID int) {
 func payCart(userID int) {
 	var price int
 	var orderID int
-	db.QueryRow("SELECT price,id FROM orders WHERE status = 'in cart' AND userID = ?", userID).Scan(&price, &orderID)
+	db.QueryRow("SELECT total_price,id FROM orders WHERE status = 'in cart' AND user_id = ?", userID).Scan(&price, &orderID)
 	fmt.Println("price :", price)
 	input := getIntInput("Enter 1 to pay")
 	if input == 1 {
 		db.Exec("UPDATE orders SET status = 'paid' WHERE id = ?", orderID)
 	}
 
+}
+func deleteAllOrdersItems(userID int) {
+	var orderID int
+	db.QueryRow("SELECT id FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderID)
+	db.Exec("DELETE FROM order_items WHERE order_id = ?", orderID)
+	db.Exec("UPDATE orders SET total_price = 0 WHERE status = 'in cart' AND user_id = ?", userID)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
 func printBooks() {
@@ -18,6 +19,7 @@ func printBooks() {
 	var authorName string
 	var category string
 	for row.Next() {
+		description, title, price, id, authorID, categoryID, authorName, category = "", "", 0, 0, 0, 0, "", ""
 		row.Scan(&id, &title, &description, &price, &authorID, &categoryID)
 		db.QueryRow("SELECT name FROM users WHERE id = ? AND role = ?", authorID, "Author").Scan(&authorName)
 		db.QueryRow("SELECT name FROM categories WHERE id = ?", categoryID).Scan(&category)
@@ -26,18 +28,34 @@ func printBooks() {
 	}
 }
 func printBooksByID(id int) {
-	var title string
 	var description string
-	var categoryID int
-	var authorID int
-	var category string
-	var author string
+	var title string
 	var price int
-	db.QueryRow("SELECT id,title,description,price,author_id,category_id FROM books WHERE id = ?", id).Scan(&id, &title, &description, &price, &authorID, &categoryID)
-	db.QueryRow("SELECT name FROM users WHERE id = ?", authorID).Scan(&author)
-	db.QueryRow("SELECT name FROM categories WHERE id = ?", categoryID).Scan(&category)
-	fmt.Printf("----[ID : %d TITLE : %s  AUTHOR : %s  CATEGORY : %s description:%s price:%d]----\n", id, title, author, category, description, price)
+	var authorID int
+	var categoryID int
+	var authorName string
+	var category string
 
+	err := db.QueryRow("SELECT title,description,price,author_id,category_id FROM books WHERE id = ?", id).Scan(&title, &description, &price, &authorID, &categoryID)
+	if err != nil {
+		fmt.Println("Book:", err)
+		return
+	}
+
+	err = db.QueryRow("SELECT name FROM users WHERE id = ? AND role = ?", authorID, "Author").Scan(&authorName)
+	fmt.Println("authorID:", authorID)
+	if err != nil {
+		fmt.Println("Author:", err)
+		return
+	}
+
+	err = db.QueryRow("SELECT name FROM categories WHERE id = ?", categoryID).Scan(&category)
+	if err != nil {
+		fmt.Println("Category:", err)
+		return
+	}
+
+	fmt.Printf("----[ID : %d TITLE : %s AUTHOR : %s CATEGORY : %s description:%s price:%d]----\n", id, title, authorName, category, description, price)
 }
 func printBooksByTitle(title string) {
 	var id int
@@ -151,4 +169,70 @@ func deleteOwnedBooks(userID int, bookID int) {
 			return
 		}
 	}
+}
+func getBookRow() (int, []string) {
+	row := getInputs([]string{"Enter title", "Enter description", "Enter price", "Enter author id", "Enter category id"})
+	for _, r := range row {
+		if r == "0" {
+			return 0, []string{}
+		}
+	}
+	return 1, row
+}
+func insertIntoBooks() int {
+	i, row := getBookRow()
+	if i == 0 {
+		return 0
+	}
+	price, err := strconv.Atoi(row[2])
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+	authorID, err := strconv.Atoi(row[3])
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+	categoryID, err := strconv.Atoi(row[4])
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+	_, err = db.Exec("INSERT INTO books(title,description,price,author_id,category_id) VALUES(?,?,?,?,?)", row[0], row[1], price, authorID, categoryID)
+	if err != nil {
+		fmt.Println("Insert book:", err)
+		return 0
+	}
+	return 1
+}
+func deleteBooks(bookID int) {
+	var bookName string
+	db.QueryRow("SELECT name FROM books WHERE id = ?").Scan(&bookName)
+	db.Exec("DELETE FROM books WHERE id =?", bookID)
+	fmt.Println(bookName + "  DELETED")
+}
+func editBook(bookID int) {
+	printBooksByID(bookID)
+	fmt.Println("------/Enter new row/-----")
+	i, row := getBookRow()
+	if i == 0 {
+		return
+	}
+	price, err := strconv.Atoi(row[2])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	authorID, err := strconv.Atoi(row[3])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	categoryID, err := strconv.Atoi(row[4])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	db.Exec("UPDATE books SET title = ?, description = ?,price = ?,author_id = ?,category_id = ? WHERE id = ?", row[0], row[1], price, authorID, categoryID, bookID)
 }

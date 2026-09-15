@@ -228,6 +228,89 @@ MainLoop:
 							switch input {
 							case 0:
 								break StaffMainLoop
+							case 1:
+								getMenu("Books", []string{"Add", "Delete", "Search"})
+							case 2:
+							BooksLoop:
+								for {
+									input := getMenu("Books", []string{"Add", "Delete", "Edit", "Search"})
+									switch input {
+									case 0:
+										break BooksLoop
+									case 1:
+										for {
+											i := insertIntoBooks()
+											if i == 0 {
+												break
+											}
+										}
+									case 2:
+									DeleteBooksLoop:
+										for {
+											id := getIntInput("Enter id")
+											if id == 0 {
+												break DeleteBooksLoop
+											}
+											deleteBooks(id)
+										}
+									case 3:
+									EditLoop:
+										for {
+											input := getIntInput("Enter book id")
+											if input == 0 {
+												break EditLoop
+											}
+											editBook(input)
+										}
+
+									case 4:
+									SearchLoop2:
+										for {
+											input := getMenu("Search by :", []string{"id", "title", "Category", "author", "View all"})
+											switch input {
+											case 0:
+												break SearchLoop2
+											case 1:
+												id := getIntInput("Enter id")
+												if id == 0 {
+													break SearchLoop2
+												}
+												printBooksByID(id)
+											case 2:
+												title := getInputs([]string{"Enter title"})
+												if title[0] == "0" {
+													break SearchLoop2
+												}
+												printBooksByTitle(title[0])
+											case 3:
+												category := getInputs([]string{"Enter category"})
+												if category[0] == "0" {
+													break SearchLoop2
+												}
+												printBooksByCategory(category[0])
+											case 4:
+												author := getInputs([]string{"Enter author"})
+												if author[0] == "0" {
+													break SearchLoop2
+												}
+												printBooksByAuthor(author[0])
+											case 5:
+												printBooks()
+											}
+
+										}
+									}
+								}
+							case 3:
+
+							case 4:
+
+							case 5:
+								userInfo[0] = ""
+								userInfo[1] = ""
+								id = 0
+								userid = ""
+								break LoginLoop
 							}
 						}
 					case "Author":

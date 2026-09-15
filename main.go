@@ -187,6 +187,7 @@ MainLoop:
 									}
 								}
 							case 2:
+								editProfile(id)
 							case 3:
 								printOrders(id)
 							case 4:

@@ -114,7 +114,7 @@ MainLoop:
 									case 1:
 									cartLoop:
 										for {
-											input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all", "View Orders"})
+											input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all", "View Orders", "View cart items"})
 											switch input {
 											case 0:
 												break cartLoop
@@ -144,6 +144,8 @@ MainLoop:
 												deleteAllOrdersItems(id)
 											case 5:
 												printOrders(id)
+											case 6:
+												printCartItems(id)
 											}
 										}
 									case 2:

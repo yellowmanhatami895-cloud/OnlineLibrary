@@ -140,3 +140,18 @@ func deleteAllOrdersItems(userID int) {
 	db.Exec("DELETE FROM order_items WHERE order_id = ?", orderID)
 	db.Exec("UPDATE orders SET total_price = 0 WHERE status = 'in cart' AND user_id = ?", userID)
 }
+func printCartItems(userID int) {
+	var orderID int
+	var bookID int
+
+	db.QueryRow("SELECT id FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderID)
+	row, err := db.Query("SELECT book_id FROM order_items WHERE order_id = ?", orderID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for row.Next() {
+		row.Scan(&bookID)
+		printBooksByID(bookID)
+
+	}
+}

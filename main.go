@@ -100,21 +100,21 @@ MainLoop:
 					CustomerMainLoop:
 						for {
 							fmt.Println("welcome Customer " + username)
-							input := getMenu("Customer Panel", []string{"Purchase Book", "Download PDF", "Edit Profile", "View Orders", "My Library", "Logout"})
+							input := getMenu("Customer Panel", []string{"Purchase Book", "Edit Profile", "View Orders", "My Library", "Logout"})
 							switch input {
 							case 0:
 								break CustomerMainLoop
 							case 1:
 							PurchaseLoop:
 								for {
-									input := getMenu("Customer Panel", []string{"Cart", "Search books", "View all books", "owned books"}) // owned books = > delete print
+									input := getMenu("Purchase Panel", []string{"Cart", "Search books", "View all books"})
 									switch input {
 									case 0:
 										break PurchaseLoop
 									case 1:
 									cartLoop:
 										for {
-											input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all", "View Orders", "View cart items"})
+											input := getMenu("Cart", []string{"Add to cart", "Remove from cart", "Pay", "Remove all", "View cart items"})
 											switch input {
 											case 0:
 												break cartLoop
@@ -143,8 +143,6 @@ MainLoop:
 											case 4:
 												deleteAllOrdersItems(id)
 											case 5:
-												printOrders(id)
-											case 6:
 												printCartItems(id)
 											}
 										}
@@ -183,11 +181,37 @@ MainLoop:
 
 										}
 									case 3:
-									case 4:
-									case 5:
+										printBooks()
+
+										printOwnedBooks(id)
+									}
+								}
+							case 2:
+							case 3:
+								printOrders(id)
+							case 4:
+							OwnedBooksLoop:
+								for {
+									input := getMenu("Owned books", []string{"Delete", "Print"})
+									switch input {
+									case 0:
+										break OwnedBooksLoop
+									case 1:
+									DeleteBookLoop:
+										for {
+											input := getIntInput("Enter book id")
+											if input == 0 {
+												break DeleteBookLoop
+											}
+											deleteOwnedBooks(id, input)
+										}
+									case 2:
+										printOwnedBooks(id)
+									case 7:
 
 									}
 								}
+							case 5:
 							}
 						}
 					case "Admin":

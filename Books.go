@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func printBooks() {
 	row, err := db.Query("SELECT id,title,description,price,author_id,category_id FROM books")
@@ -104,4 +106,49 @@ func printBooksByAuthor(author string) {
 		fmt.Printf("----[ID : %d TITLE : %s  AUTHOR : %s  CATEGORY : %s description:%s price:%d]----\n", id, title, author, category, description, price)
 	}
 
+}
+func printOwnedBooks(userID int) {
+	var bookID int
+	var orderID int
+	row, err := db.Query("SELECT id FROM orders WHERE user_id = ? AND status = 'paid'", userID)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for row.Next() {
+		row.Scan(&orderID)
+		rowBook, err := db.Query("SELECT book_id FROM order_items WHERE order_id = ?", orderID)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		for rowBook.Next() {
+			rowBook.Scan(&bookID)
+			printBooksByID(bookID)
+		}
+
+	}
+}
+
+func deleteOwnedBooks(userID int, bookID int) {
+	var orderID int
+	var orderIDs []int
+	row, err := db.Query("SELECT id FROM orders WHERE user_id = ? AND status = 'paid'", userID)
+	if err != nil {
+		fmt.Println("Query orders:", err)
+		return
+	}
+	for row.Next() {
+		row.Scan(&orderID)
+		orderIDs = append(orderIDs, orderID)
+	}
+	row.Close()
+	for _, id := range orderIDs {
+		_, err := db.Exec("DELETE FROM order_items WHERE order_id = ? AND book_id = ?", id, bookID)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 }

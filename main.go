@@ -257,9 +257,27 @@ MainLoop:
 										}
 									case 3:
 										userID := getIntInput("Enter id")
-										editUser(userID)
+										editProfile(userID)
 									case 4:
+										input := getMenu("Search", []string{"By id", "By email", "By name", "By role", "View all"})
+										switch input {
+										case 1:
+											userID := getIntInput("Enter id")
+											printUsersByID(userID)
+										case 2:
+											email := getInputs([]string{"Enter email"})
+											printUsersByEmail(email[0])
+										case 3:
+											name := getInputs([]string{"Enter name"})
+											printUsersByName(name[0])
+										case 4:
+											role := getInputs([]string{"Enter role"})
+											printUsersByRole(role[0])
+										case 5:
+											printUsers()
+										}
 									}
+
 								}
 							case 2:
 							BooksLoop:

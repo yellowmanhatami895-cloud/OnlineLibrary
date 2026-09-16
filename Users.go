@@ -92,32 +92,61 @@ func deleteFromUsers(userID int) {
 	}
 	fmt.Println(name + " DELETED")
 }
-func editUser(userID int) {
-	var oldEmail string
+
+func printUsersByEmail(userEmail string) {
+	var id int
+	var name string
+	var password string
+	var role string
 	var email string
-	db.QueryRow("SELECT email FROM users WHERE id = ?", userID).Scan(&oldEmail)
-
-	printUsersByID(userID)
-	record := getInputs([]string{"Enter new name", "new email", "new password", "new role"})
-
-	row, err := db.Query("SELECT email FROM users")
+	db.QueryRow("SELECT * FROM users WHERE email = ?", userEmail).Scan(&id, &name, &email, &password, &role)
+	fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
+}
+func printUsersByName(name string) {
+	var id int
+	var password string
+	var role string
+	var email string
+	row, err := db.Query("SELECT * FROM users WHERE name = ?", name)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	for row.Next() {
-		row.Scan(&email)
-		if email == oldEmail {
-			continue
-		}
-		if email == record[1] {
-			fmt.Println("email must be unique")
-			return
-		}
+		row.Scan(&id, &name, &email, &password, &role)
+		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
 	}
-	row.Close()
-	_, err = db.Exec("UPDATE users SET name = ?, email = ?, password = ?,role = ? WHERE id = ?", record[0], record[1], record[2], record[3], userID)
+
+}
+func printUsersByRole(role string) {
+	var id int
+	var password string
+	var name string
+	var email string
+	row, err := db.Query("SELECT * FROM users WHERE role = ?", role)
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	for row.Next() {
+		row.Scan(&id, &name, &email, &password, &name)
+		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
+	}
+
+}
+func printUsers() {
+	var id int
+	var password string
+	var name string
+	var email string
+	var role string
+	row, err := db.Query("SELECT * FROM users")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for row.Next() {
+		row.Scan(&id, &name, &email, &password, &role)
+		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
 	}
 }

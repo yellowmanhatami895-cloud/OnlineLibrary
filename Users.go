@@ -92,3 +92,32 @@ func deleteFromUsers(userID int) {
 	}
 	fmt.Println(name + " DELETED")
 }
+func editUser(userID int) {
+	var oldEmail string
+	var email string
+	db.QueryRow("SELECT email FROM users WHERE id = ?", userID).Scan(&oldEmail)
+
+	printUsersByID(userID)
+	record := getInputs([]string{"Enter new name", "new email", "new password", "new role"})
+
+	row, err := db.Query("SELECT email FROM users")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for row.Next() {
+		row.Scan(&email)
+		if email == oldEmail {
+			continue
+		}
+		if email == record[1] {
+			fmt.Println("email must be unique")
+			return
+		}
+	}
+	row.Close()
+	_, err = db.Exec("UPDATE users SET name = ?, email = ?, password = ?,role = ? WHERE id = ?", record[0], record[1], record[2], record[3], userID)
+	if err != nil {
+		fmt.Println(err)
+	}
+}

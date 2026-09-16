@@ -256,6 +256,8 @@ MainLoop:
 											deleteFromUsers(userID)
 										}
 									case 3:
+										userID := getIntInput("Enter id")
+										editUser(userID)
 									case 4:
 									}
 								}

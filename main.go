@@ -189,7 +189,7 @@ MainLoop:
 							case 2:
 								editProfile(id)
 							case 3:
-								printOrders(id)
+								printOrdersByUserID(id)
 							case 4:
 							OwnedBooksLoop:
 								for {
@@ -204,7 +204,7 @@ MainLoop:
 											if input == 0 {
 												break DeleteBookLoop
 											}
-											deleteOwnedBooks(id, input)
+											deletePurchasedBook(id, input)
 										}
 									case 2:
 										printOwnedBooks(id)
@@ -224,7 +224,7 @@ MainLoop:
 					StaffMainLoop:
 						for {
 							fmt.Println("welcome Admin " + username)
-							input := getMenu("Admin panel", []string{"Manage users", "Manage books", "View orders", "View sales", "Logout"}) // add del edit print book and users
+							input := getMenu("Admin panel", []string{"Manage users", "Manage books", "View orders", "Logout"})
 							switch input {
 							case 0:
 								break StaffMainLoop
@@ -259,22 +259,27 @@ MainLoop:
 										userID := getIntInput("Enter id")
 										editProfile(userID)
 									case 4:
-										input := getMenu("Search", []string{"By id", "By email", "By name", "By role", "View all"})
-										switch input {
-										case 1:
-											userID := getIntInput("Enter id")
-											printUsersByID(userID)
-										case 2:
-											email := getInputs([]string{"Enter email"})
-											printUsersByEmail(email[0])
-										case 3:
-											name := getInputs([]string{"Enter name"})
-											printUsersByName(name[0])
-										case 4:
-											role := getInputs([]string{"Enter role"})
-											printUsersByRole(role[0])
-										case 5:
-											printUsers()
+									AdminSearchBookLoop:
+										for {
+											input := getMenu("Search", []string{"By id", "By email", "By name", "By role", "View all"})
+											switch input {
+											case 0:
+												break AdminSearchBookLoop
+											case 1:
+												userID := getIntInput("Enter id")
+												printUsersByID(userID)
+											case 2:
+												email := getInputs([]string{"Enter email"})
+												printUsersByEmail(email[0])
+											case 3:
+												name := getInputs([]string{"Enter name"})
+												printUsersByName(name[0])
+											case 4:
+												role := getInputs([]string{"Enter role"})
+												printUsersByRole(role[0])
+											case 5:
+												printUsers()
+											}
 										}
 									}
 
@@ -351,10 +356,8 @@ MainLoop:
 									}
 								}
 							case 3:
-
+								printOrders()
 							case 4:
-
-							case 5:
 								userInfo[0] = ""
 								userInfo[1] = ""
 								id = 0
@@ -366,10 +369,36 @@ MainLoop:
 					AuthorMainLoop:
 						for {
 							fmt.Println("welcome Admin " + username)
-							input := getMenu("Staff panel", []string{"Manage books", "View Sales"}) // set price , del add edit  print own book
+							input := getMenu("Author panel", []string{"View all owned books", "add book", "delete book", "Edit book", "View Sales", "Logout"})
 							switch input {
 							case 0:
 								break AuthorMainLoop
+							case 1:
+								var authorName string
+								db.QueryRow("SELECT name FROM users WHERE id = ?", id).Scan(&authorName)
+								printBooksByAuthor(authorName)
+							case 2:
+								for {
+									i := insertIntoBooks()
+									if i == 0 {
+										break
+									}
+								}
+							case 3:
+								bookID := getIntInput("Enter book id")
+								deleteOwnedBook(bookID, id)
+							case 4:
+								bookID := getIntInput("Enter book id")
+								EditOwnedBooks(id, bookID)
+							case 5:
+								printSales(id)
+							case 6:
+
+								userInfo[0] = ""
+								userInfo[1] = ""
+								id = 0
+								userid = ""
+								break LoginLoop
 							}
 						}
 					}

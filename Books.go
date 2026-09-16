@@ -149,7 +149,7 @@ func printOwnedBooks(userID int) {
 	}
 }
 
-func deleteOwnedBooks(userID int, bookID int) {
+func deletePurchasedBook(userID int, bookID int) {
 	var orderID int
 	var orderIDs []int
 	row, err := db.Query("SELECT id FROM orders WHERE user_id = ? AND status = 'paid'", userID)

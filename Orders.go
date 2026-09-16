@@ -109,10 +109,11 @@ func DeleteBookFromOrderItems(bookID int, userID int, status string) {
 	db.QueryRow("SELECT total_price FROM orders WHERE id = ?", orderID).Scan(&totalPrice)
 	db.Exec("UPDATE orders set total_price = ? WHERE id = ?", totalPrice-price, orderID)
 }
-func printOrders(userID int) {
+func printOrdersByUserID(userID int) {
 	row, err := db.Query("SELECT * FROM orders WHERE user_id = ?", userID)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	var orderID int
 	var totalPrice int
@@ -153,5 +154,21 @@ func printCartItems(userID int) {
 		row.Scan(&bookID)
 		printBooksByID(bookID)
 
+	}
+}
+func printOrders() {
+	row, err := db.Query("SELECT * FROM orders")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var userID int
+	var orderID int
+	var totalPrice int
+	var status string
+	var time string
+	for row.Next() {
+		row.Scan(&orderID, &userID, &totalPrice, &status, &time)
+		fmt.Printf("--[order id : %d  user id : %d total price : %d status : %s time : %s]--\n", orderID, userID, totalPrice, status, time)
 	}
 }

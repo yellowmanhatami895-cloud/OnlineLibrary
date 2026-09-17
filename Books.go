@@ -6,25 +6,23 @@ import (
 )
 
 func printBooks() {
-	row, err := db.Query("SELECT id,title,description,price,author_id,category_id FROM books")
+	row, err := db.Query("SELECT books.title,books.price,books.description,users.name,categories.name FROM books INNER JOIN users ON books.author_id = users.id INNER JOIN categories ON books.category_id = categories.id WHERE users.role = 'Author';")
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
-	var description string
-	var title string
-	var price int
-	var id int
-	var authorID int
-	var categoryID int
+	var bookName string
+	var bookPrice int
+	var bookDescriptions string
 	var authorName string
-	var category string
+	var categoryName string
 	for row.Next() {
-		description, title, price, id, authorID, categoryID, authorName, category = "", "", 0, 0, 0, 0, "", ""
-		row.Scan(&id, &title, &description, &price, &authorID, &categoryID)
-		db.QueryRow("SELECT name FROM users WHERE id = ? AND role = ?", authorID, "Author").Scan(&authorName)
-		db.QueryRow("SELECT name FROM categories WHERE id = ?", categoryID).Scan(&category)
-		fmt.Printf("----[ID : %d TITLE : %s  AUTHOR : %s  CATEGORY : %s description:%s price:%d]----\n", id, title, authorName, category, description, price)
-
+		row.Scan(&bookName, &bookPrice, &bookDescriptions, &authorName, &categoryName)
+		fmt.Printf("[Name : %s ]--[Price : %d]--[Descriptions : %s]--[Author : %s]--[category : %s]---\n", bookName, bookPrice, bookDescriptions, authorName, categoryName)
+	}
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
 	}
 }
 func printBooksByID(id int) {

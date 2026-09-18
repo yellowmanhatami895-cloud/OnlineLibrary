@@ -236,17 +236,7 @@ MainLoop:
 									case 0:
 										break UsersLoop
 									case 1:
-									AdminAddLoop:
-										for {
-											record := getInputs([]string{"Enter name", "email", "password", "role"})
-											for _, s := range record {
-												if s == "0" {
-													break AdminAddLoop
-												}
-											}
-											insertIntoUsers(record)
-
-										}
+										insertUsers()
 									case 2:
 										for {
 											userID := getIntInput("Enter user id")
@@ -405,8 +395,7 @@ MainLoop:
 				}
 			}
 		case 2:
-			inputs := getInputs([]string{"Enter username", "Enter email", "Enter password"})
-			insertIntoUsers(append(inputs, "Customer"))
+			insertCustomerIntoUsers()
 		}
 
 	}

@@ -2,6 +2,15 @@ package main
 
 import "fmt"
 
+func insertCustomerIntoUsers() {
+	record := getInputs([]string{"Enter name", "Email", "Password"})
+	record = append(record, "Customer")
+	insertIntoUsers(record)
+}
+func insertUsers() {
+	record := getInputs([]string{"Enter name", "Email", "Password", "role"})
+	insertIntoUsers(record)
+}
 func insertIntoUsers(record []string) {
 	if len(record) != 4 {
 		fmt.Println("wrong length")
@@ -22,13 +31,15 @@ func insertIntoUsers(record []string) {
 	}
 	row.Close()
 
-	_, err = db.Exec("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)", record[0], record[1], record[2], record[3])
+	result, err := db.Exec("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)", record[0], record[1], record[2], record[3])
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	var id int
-	db.QueryRow("SELECT id FROM users WHERE email = ?", record[1]).Scan(&id)
+	id, err := result.LastInsertId()
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Println("Your id  :", id)
 }
 func PasswordISCorrectUsers(userInfo []string) bool {

@@ -183,7 +183,7 @@ MainLoop:
 									case 3:
 										printBooks()
 
-										printOwnedBooks(id)
+										printPurchasedBooks(id)
 									}
 								}
 							case 2:
@@ -207,7 +207,7 @@ MainLoop:
 											deletePurchasedBook(id, input)
 										}
 									case 2:
-										printOwnedBooks(id)
+										printPurchasedBooks(id)
 									case 7:
 
 									}

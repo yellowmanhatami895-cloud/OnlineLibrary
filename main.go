@@ -37,6 +37,11 @@ func getInputs(titles []string) []string {
 			}
 			break
 		}
+		err := scanner.Err()
+		if err != nil {
+			fmt.Println(err)
+			return []string{}
+		}
 		if scanner.Text() == "0" {
 			return []string{"0"}
 		}

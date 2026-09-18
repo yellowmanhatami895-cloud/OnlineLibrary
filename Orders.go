@@ -5,6 +5,17 @@ import (
 	"fmt"
 )
 
+func printOrdersRows(row *sql.Rows) {
+	var userID int
+	var orderID int
+	var totalPrice int
+	var status string
+	var time string
+	for row.Next() {
+		row.Scan(&orderID, &userID, &totalPrice, &status, &time)
+		fmt.Printf("--[order id : %d  user id : %d total price : %d status : %s time : %s]--\n", orderID, userID, totalPrice, status, time)
+	}
+}
 func insertBooksIntCart(bookIDs []int, userID int, status string) {
 
 	var orderStatus string
@@ -99,14 +110,13 @@ func DeleteBookFromOrderItems(bookID int, userID int, status string) {
 	var price int
 	var totalPrice int
 	var orderID int
-	db.QueryRow("SELECT id FROM orders WHERE user_id = ? AND status = ?", userID, status).Scan(&orderID)
-	db.QueryRow("SELECT price FROM books WHERE id = ?", bookID).Scan(&price)
+	var bookName string
+	db.QueryRow("SELECT books.title,books.price,orders.id,orders.total_price FROM books INNER JOIN order_items ON order_items.book_id = books.id INNER JOIN orders ON orders.id = order_items.order_id WHERE books.id = ? AND orders.user_id =  ? AND orders.status = 'in cart'", bookID, userID).Scan(&bookName, &price, &orderID, &totalPrice)
 	if price == 0 {
 		fmt.Println("book does not Exist")
 		return
 	}
 	db.Exec("DELETE FROM order_items WHERE order_id = ? AND book_id = ?", orderID, bookID)
-	db.QueryRow("SELECT total_price FROM orders WHERE id = ?", orderID).Scan(&totalPrice)
 	db.Exec("UPDATE orders set total_price = ? WHERE id = ?", totalPrice-price, orderID)
 }
 func printOrdersByUserID(userID int) {
@@ -115,14 +125,7 @@ func printOrdersByUserID(userID int) {
 		fmt.Println(err)
 		return
 	}
-	var orderID int
-	var totalPrice int
-	var status string
-	var time string
-	for row.Next() {
-		row.Scan(&orderID, &userID, &totalPrice, &status, &time)
-		fmt.Printf("--[order id : %d  user id : %d total price : %d status : %s time : %s]--\n", orderID, userID, totalPrice, status, time)
-	}
+	printOrdersRows(row)
 }
 func payCart(userID int) {
 	var price int
@@ -142,18 +145,20 @@ func deleteAllOrdersItems(userID int) {
 	db.Exec("UPDATE orders SET total_price = 0 WHERE status = 'in cart' AND user_id = ?", userID)
 }
 func printCartItems(userID int) {
-	var orderID int
 	var bookID int
 
-	db.QueryRow("SELECT id FROM orders WHERE user_id = ? AND status = 'in cart'", userID).Scan(&orderID)
-	row, err := db.Query("SELECT book_id FROM order_items WHERE order_id = ?", orderID)
+	row, err := db.Query("SELECT books.id FROM books INNER JOIN order_items ON order_items.book_id = books.id INNER JOIN orders ON orders.id = order_items.order_id WHERE orders.user_id = ?", userID)
 	if err != nil {
 		fmt.Println(err)
 	}
 	for row.Next() {
 		row.Scan(&bookID)
 		printBooksByID(bookID)
-
+	}
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 }
 func printOrders() {
@@ -162,13 +167,5 @@ func printOrders() {
 		fmt.Println(err)
 		return
 	}
-	var userID int
-	var orderID int
-	var totalPrice int
-	var status string
-	var time string
-	for row.Next() {
-		row.Scan(&orderID, &userID, &totalPrice, &status, &time)
-		fmt.Printf("--[order id : %d  user id : %d total price : %d status : %s time : %s]--\n", orderID, userID, totalPrice, status, time)
-	}
+	printOrdersRows(row)
 }

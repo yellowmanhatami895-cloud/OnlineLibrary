@@ -2,6 +2,28 @@ package main
 
 import "fmt"
 
+func checkEmail(oldEmail string, newEmail string) {
+	row, err := db.Query("SELECT email FROM users")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var email string
+	for row.Next() {
+		row.Scan(&email)
+		if email == oldEmail {
+			continue
+		}
+		if email == newEmail {
+			fmt.Println("Email is already used")
+		}
+	}
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
 func insertCustomerIntoUsers() {
 	record := getInputs([]string{"Enter name", "Email", "Password"})
 	record = append(record, "Customer")
@@ -16,21 +38,7 @@ func insertIntoUsers(record []string) {
 		fmt.Println("wrong length")
 		return
 	}
-	row, err := db.Query("SELECT email FROM users")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	var email string
-	for row.Next() {
-		row.Scan(&email)
-		if email == record[1] {
-			fmt.Println("email is already exists")
-			return
-		}
-	}
-	row.Close()
-
+	checkEmail("", record[1])
 	result, err := db.Exec("INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)", record[0], record[1], record[2], record[3])
 	if err != nil {
 		fmt.Println(err)
@@ -48,7 +56,7 @@ func PasswordISCorrectUsers(userInfo []string) bool {
 	var r string
 	db.QueryRow("SELECT password,name,role FROM users WHERE id = ?", userInfo[0]).Scan(&password, &un, &r)
 	if password == "" {
-		fmt.Println("id does not Exists")
+		fmt.Println("id does not Exist")
 		return false
 	}
 	if password == userInfo[1] {
@@ -67,22 +75,7 @@ func editProfile(userID int) {
 		return
 	}
 	db.QueryRow("SELECT email FROM users WHERE id = ?", userID).Scan(&oldEmail)
-	row, err := db.Query("SELECT email FROM users")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	var email string
-	for row.Next() {
-		row.Scan(&email)
-		if oldEmail == email {
-			continue
-		}
-		if email == info[1] {
-			fmt.Println("email is already used")
-			return
-		}
-	}
+	checkEmail(oldEmail, info[1])
 	db.Exec("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?", info[0], info[1], info[2], userID)
 }
 func printUsersByID(userID int) {
@@ -127,7 +120,11 @@ func printUsersByName(name string) {
 		row.Scan(&id, &name, &email, &password, &role)
 		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
 	}
-
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 func printUsersByRole(role string) {
 	var id int
@@ -144,6 +141,11 @@ func printUsersByRole(role string) {
 		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
 	}
 
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 func printUsers() {
 	var id int
@@ -159,5 +161,11 @@ func printUsers() {
 	for row.Next() {
 		row.Scan(&id, &name, &email, &password, &role)
 		fmt.Printf("---[Id : %d name : %s email : %s password : %s role : %s]--\n", id, name, email, password, role)
+	}
+
+	err = row.Err()
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 }
